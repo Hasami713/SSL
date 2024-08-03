@@ -13,7 +13,9 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Component
 @RequiredArgsConstructor
 public class BotInitializer {
+
     private final SelfServiceLaundryBot bot;
+
     @PostConstruct
     public void init() throws TelegramApiException {
 

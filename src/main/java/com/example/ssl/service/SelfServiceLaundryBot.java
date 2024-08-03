@@ -34,12 +34,12 @@ public class SelfServiceLaundryBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return config.getBotName();
+        return config.name();
     }
 
     @Override
     public String getBotToken() {
-        return config.getToken();
+        return config.token();
     }
 
     public static Message sendMessage(Long chatId, String textToSend) {
