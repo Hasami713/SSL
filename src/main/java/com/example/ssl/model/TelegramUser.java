@@ -2,6 +2,8 @@ package com.example.ssl.model;
 
 import com.example.ssl.states.ChatState;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,5 +26,6 @@ public class TelegramUser {
     private String userName;
     private Timestamp registeredAt;
     private Integer messageId;
+    @Enumerated(EnumType.STRING)
     private ChatState state;
 }

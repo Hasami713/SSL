@@ -3,6 +3,8 @@ package com.example.ssl.service;
 import com.example.ssl.api.ParserApi;
 import com.example.ssl.model.KeyboardButton;
 import com.example.ssl.model.LaundryInfo;
+import com.example.ssl.repository.UserRepository;
+import com.example.ssl.states.ChatState;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PrimitiveIterator;
 
 import static com.example.ssl.service.SelfServiceLaundryBot.BOT;
 import static com.example.ssl.service.SelfServiceLaundryBot.sendMessage;
@@ -25,6 +28,7 @@ import static com.example.ssl.service.SelfServiceLaundryBot.sendMessage;
 public class KeyboardMarkupService {
 
     private final ParserApi parserApi;
+    private final UserService userService;
 
     private static InlineKeyboardMarkup getInlineKeyboardMarkup(int pageNumber, List<KeyboardButton> pageAddresses, int totalPages) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -62,7 +66,6 @@ public class KeyboardMarkupService {
     }
 
     public void showAddresses(Long chatId, int pageNumber, CallbackQuery callbackQuery) {
-
         List<LaundryInfo> laundries = parserApi.getLaundries();
 
         List<KeyboardButton> buttons = laundries.stream()
@@ -98,7 +101,7 @@ public class KeyboardMarkupService {
         if (data.startsWith("LAUNDRY_ID:")) {
             String laundryId = data.substring("LAUNDRY_ID:".length());
             LaundryInfo laundryInfo = parserApi.getLaundryInfo(laundryId);
-
+            userService.updateUserChatState(message, ChatState.ADDRESS_CHOSEN);
             if (laundryInfo == null) {
                 sendMessage(chatId, "Прачечная не найдена!");
                 return;

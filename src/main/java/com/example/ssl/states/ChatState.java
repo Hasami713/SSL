@@ -1,5 +1,6 @@
 package com.example.ssl.states;
 
 public enum ChatState {
-    ADDRESS
+    CHOICE_ADDRESS,
+    ADDRESS_CHOSEN
 }
