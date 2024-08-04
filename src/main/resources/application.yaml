@@ -1,11 +1,11 @@
 spring:
-jpa:
-  hibernate:
-    ddl-auto: update
-datasource:
-  url: ${DATABASE_URL}
-  username: ${DATABASE_NAME}
-  password: ${DATABASE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
 
 logging:
   level:
