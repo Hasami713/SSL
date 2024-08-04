@@ -1,0 +1,20 @@
+spring:
+jpa:
+  hibernate:
+    ddl-auto: update
+datasource:
+  url: ${DATABASE_URL}
+  username: ${DATABASE_NAME}
+  password: ${DATABASE_PASSWORD}
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+
+bot:
+  name: ${BOT_NAME}
+  token: ${BOT_TOKEN}
+
+parser:
+  url: http://185.223.93.175:8091/
