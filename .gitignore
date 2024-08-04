@@ -3,7 +3,8 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-
+C:\Users\amirk\Java Projects\SSL\src\main\resources\application.properties
+C:\Users\amirk\Java Projects\SSL\src\main\resources\application.yaml
 ### STS ###
 .apt_generated
 .classpath
