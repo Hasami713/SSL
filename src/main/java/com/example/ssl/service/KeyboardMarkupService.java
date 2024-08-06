@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.MessageId;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -21,6 +22,8 @@ import java.util.PrimitiveIterator;
 
 import static com.example.ssl.service.SelfServiceLaundryBot.BOT;
 import static com.example.ssl.service.SelfServiceLaundryBot.sendMessage;
+import static com.example.ssl.states.ChatState.ADDRESS_CHOSEN;
+import static com.example.ssl.states.ChatState.CHOICE_ADDRESS;
 
 @Slf4j
 @Service
@@ -30,11 +33,11 @@ public class KeyboardMarkupService {
     private final ParserApi parserApi;
     private final UserService userService;
 
-    private static InlineKeyboardMarkup getInlineKeyboardMarkup(int pageNumber, List<KeyboardButton> pageAddresses, int totalPages) {
+    private static InlineKeyboardMarkup getInlineKeyboardMarkup(int pageNumber, List<KeyboardButton> keyboardData, int totalPages, int pageSize) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
-        for (KeyboardButton keyboardButton : pageAddresses) {
+        for (KeyboardButton keyboardButton : keyboardData) {
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText(keyboardButton.text());
             button.setCallbackData(keyboardButton.callback());
@@ -44,21 +47,23 @@ public class KeyboardMarkupService {
         }
 
         // Добавление кнопок навигации
-        List<InlineKeyboardButton> navigationRow = new ArrayList<>();
-        if (pageNumber > 1) {
-            InlineKeyboardButton prevButton = new InlineKeyboardButton();
-            prevButton.setText("⬅️ Назад");
-            prevButton.setCallbackData("PAGE:" + (pageNumber - 1));
-            navigationRow.add(prevButton);
-        }
-        if (pageNumber < totalPages) {
-            InlineKeyboardButton nextButton = new InlineKeyboardButton();
-            nextButton.setText("Вперед ➡️");
-            nextButton.setCallbackData("PAGE:" + (pageNumber + 1));
-            navigationRow.add(nextButton);
-        }
-        if (!navigationRow.isEmpty()) {
-            rowsInline.add(navigationRow);
+        if (totalPages > pageSize) {
+            List<InlineKeyboardButton> navigationRow = new ArrayList<>();
+            if (pageNumber > 1) {
+                InlineKeyboardButton prevButton = new InlineKeyboardButton();
+                prevButton.setText("⬅️ Назад");
+                prevButton.setCallbackData("PAGE:" + (pageNumber - 1));
+                navigationRow.add(prevButton);
+            }
+            if (pageNumber < totalPages) {
+                InlineKeyboardButton nextButton = new InlineKeyboardButton();
+                nextButton.setText("Вперед ➡️");
+                nextButton.setCallbackData("PAGE:" + (pageNumber + 1));
+                navigationRow.add(nextButton);
+            }
+            if (!navigationRow.isEmpty()) {
+                rowsInline.add(navigationRow);
+            }
         }
 
         inlineKeyboardMarkup.setKeyboard(rowsInline);
@@ -67,7 +72,6 @@ public class KeyboardMarkupService {
 
     public void showAddresses(Long chatId, int pageNumber, CallbackQuery callbackQuery) {
         List<LaundryInfo> laundries = parserApi.getLaundries();
-
         List<KeyboardButton> buttons = laundries.stream()
                 .map(laundry -> new KeyboardButton(
                         "LAUNDRY_ID:".concat(laundry.getLaundryId()),
@@ -84,10 +88,14 @@ public class KeyboardMarkupService {
 
         List<KeyboardButton> pageAddresses = buttons.subList(startIndex, endIndex);
 
-        InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboardMarkup(pageNumber, pageAddresses, totalPages);
+        InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboardMarkup(pageNumber, pageAddresses, totalPages, pageSize);
         if (callbackQuery == null) {
             SelfServiceLaundryBot.sendMessage(chatId, "Выберите адрес общежития:", inlineKeyboardMarkup);
-        } else {
+        } else if (callbackQuery.getData().startsWith("BACK_TO_ADDRESSES")) {
+            Integer messageId = callbackQuery.getMessage().getMessageId();
+            SelfServiceLaundryBot.editMessage(chatId, messageId, "Выберите адрес общежития:", inlineKeyboardMarkup);
+        }
+        else {
             editKeyboard(callbackQuery, inlineKeyboardMarkup);
         }
     }
@@ -101,17 +109,26 @@ public class KeyboardMarkupService {
         if (data.startsWith("LAUNDRY_ID:")) {
             String laundryId = data.substring("LAUNDRY_ID:".length());
             LaundryInfo laundryInfo = parserApi.getLaundryInfo(laundryId);
-            userService.updateUserChatState(message, ChatState.ADDRESS_CHOSEN);
+            userService.updateUserChatState(message, ADDRESS_CHOSEN);
             if (laundryInfo == null) {
                 sendMessage(chatId, "Прачечная не найдена!");
                 return;
             }
-
+            userService.updateLaundryId(message, laundryId);
             // Обработка выбора адреса
-            SelfServiceLaundryBot.editMessage(chatId, messageId, "Вы выбрали адрес: " + laundryInfo.getAddress());
+            List<KeyboardButton> chosenAddressMenu = new ArrayList<>();
+            chosenAddressMenu.add(new KeyboardButton("SUBSCRIBE_TO_ALL", "Отслеживать свободные слоты"));
+            chosenAddressMenu.add(new KeyboardButton("SUBSCRIBE_TO_SLOT", "Отслеживать определенный слот"));
+            chosenAddressMenu.add(new KeyboardButton("BACK_TO_ADDRESSES", "Назад⬅⬅⬅"));
+            InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboardMarkup(1, chosenAddressMenu, 1, 8);
+            SelfServiceLaundryBot.editMessage(chatId, messageId, "Вы выбрали адрес: " + laundryInfo.getAddress(), inlineKeyboardMarkup);
         } else if (data.startsWith("PAGE:")) {
             int pageNumber = Integer.parseInt(data.substring("PAGE:".length()));
             showAddresses(chatId, pageNumber, callbackQuery);
+        } else if (data.startsWith("BACK_TO_ADDRESSES")) {
+            showAddresses(chatId, 1, callbackQuery);
+            userService.updateUserChatState(message, CHOICE_ADDRESS);
+            userService.updateLaundryId(message, "-");
         }
     }
 

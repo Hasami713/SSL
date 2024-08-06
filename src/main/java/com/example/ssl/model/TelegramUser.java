@@ -28,4 +28,5 @@ public class TelegramUser {
     private Integer messageId;
     @Enumerated(EnumType.STRING)
     private ChatState state;
+    private String laundryId;
 }

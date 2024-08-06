@@ -67,15 +67,16 @@ public class SelfServiceLaundryBot extends TelegramLongPollingBot {
         }
     }
 
-    public static void editMessage(Long chatId, Integer messageId, String text) {
+    public static void editMessage(Long chatId, Integer messageId, String text, InlineKeyboardMarkup inlineKeyboardMarkup) {
         EditMessageText editMessageText = new EditMessageText();
         editMessageText.setChatId(chatId);
         editMessageText.setMessageId(messageId);
         editMessageText.setText(text);
+        editMessageText.setReplyMarkup(inlineKeyboardMarkup);
         try {
             BOT.execute(editMessageText);
         } catch (TelegramApiException e) {
-            log.error("Error occured:" + e.getMessage());
+            log.error("Error:" + e.getMessage());
         }
     }
 
