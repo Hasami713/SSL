@@ -111,7 +111,7 @@ public class KeyboardMarkupService {
             LaundryInfo laundryInfo = parserApi.getLaundryInfo(laundryId);
             userService.updateUserChatState(message, ADDRESS_CHOSEN);
             if (laundryInfo == null) {
-                sendMessage(chatId, "Прачечная не найдена!");
+                sendMessage(chatId, "Прачечная не найдена!", null);
                 return;
             }
             userService.updateLaundryId(message, laundryId);
