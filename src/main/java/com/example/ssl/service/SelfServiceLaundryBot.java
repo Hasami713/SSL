@@ -36,6 +36,10 @@ public class SelfServiceLaundryBot extends TelegramLongPollingBot {
         return config.name();
     }
 
+    @Override
+    public String getBotToken() {
+        return config.token();
+    }
 
     public static Message sendMessage(Long chatId, String textToSend, InlineKeyboardMarkup inlineKeyboardMarkup) {
         SendMessage message = new SendMessage();
