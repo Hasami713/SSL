@@ -3,6 +3,7 @@ package com.example.ssl.service;
 import com.example.ssl.config.BotConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -26,6 +27,7 @@ public class SelfServiceLaundryBot extends TelegramLongPollingBot {
     private void init() {
         BOT = this;
     }
+
     @Override
     public void onUpdateReceived(Update update) {
         messageHandlerService.messageHandle(update);
@@ -41,30 +43,22 @@ public class SelfServiceLaundryBot extends TelegramLongPollingBot {
         return config.token();
     }
 
+    @SneakyThrows
     public static Message sendMessage(Long chatId, String textToSend, InlineKeyboardMarkup inlineKeyboardMarkup) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf((chatId)));
         message.setText(textToSend);
         message.setReplyMarkup(inlineKeyboardMarkup);
-        try {
-            return BOT.execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Error occured:" + e.getMessage());
-        }
-        return null;
+        return BOT.execute(message);
     }
 
+    @SneakyThrows
     public static void editMessage(Long chatId, Integer messageId, String text, InlineKeyboardMarkup inlineKeyboardMarkup) {
         EditMessageText editMessageText = new EditMessageText();
         editMessageText.setChatId(chatId);
         editMessageText.setMessageId(messageId);
         editMessageText.setText(text);
         editMessageText.setReplyMarkup(inlineKeyboardMarkup);
-        try {
-            BOT.execute(editMessageText);
-        } catch (TelegramApiException e) {
-            log.error("Error:" + e.getMessage());
-        }
+        BOT.execute(editMessageText);
     }
-
 }
