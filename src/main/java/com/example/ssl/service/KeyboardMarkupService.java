@@ -1,5 +1,6 @@
 package com.example.ssl.service;
 
+import com.example.ssl.api.EngineApi;
 import com.example.ssl.api.ParserApi;
 import com.example.ssl.model.KeyboardButton;
 import com.example.ssl.model.LaundryInfo;
@@ -32,6 +33,8 @@ public class KeyboardMarkupService {
 
     private final ParserApi parserApi;
     private final UserService userService;
+
+    private final EngineApi engineApi;
 
     private static InlineKeyboardMarkup getInlineKeyboardMarkup(int pageNumber, List<KeyboardButton> keyboardData, int totalPages, int pageSize) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -122,6 +125,7 @@ public class KeyboardMarkupService {
             chosenAddressMenu.add(new KeyboardButton("BACK_TO_ADDRESSES", "Назад⬅⬅⬅"));
             InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboardMarkup(1, chosenAddressMenu, 1, 8);
             SelfServiceLaundryBot.editMessage(chatId, messageId, "Вы выбрали адрес: " + laundryInfo.getAddress(), inlineKeyboardMarkup);
+            engineApi.heartbeatTest("sdsadsd");
         } else if (data.startsWith("PAGE:")) {
             int pageNumber = Integer.parseInt(data.substring("PAGE:".length()));
             showAddresses(chatId, pageNumber, callbackQuery);

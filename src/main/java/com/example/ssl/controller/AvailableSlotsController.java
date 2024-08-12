@@ -9,10 +9,9 @@ import com.example.ssl.repository.UserRepository;
 import com.example.ssl.service.SelfServiceLaundryBot;
 import com.example.ssl.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.telegram.telegrambots.meta.api.objects.ChatInviteLink;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -22,9 +21,12 @@ import java.util.Optional;
 
 import static com.example.ssl.service.SelfServiceLaundryBot.*;
 
-@Controller
+@Slf4j
+@RestController
 @RequiredArgsConstructor
+@RequestMapping
 public class AvailableSlotsController {
+
     @PostMapping("api/v1/availableSlots")
     public static @ResponseBody SendMessageResponse sendMessage(@RequestBody SendMessageRequest sendMessageRequest) {
         try {

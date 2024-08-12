@@ -6,15 +6,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
 
-@ConfigurationProperties(prefix = "parser")
-public class ParserConfig extends ClientConfig  {
+@ConfigurationProperties(prefix = "engine")
+public class EngineConfig extends ClientConfig {
 
-    public ParserConfig(String url) {
+    public EngineConfig(String url) {
         super(url);
     }
 
     @Bean
-    public RestTemplate parserClient() {
+    public RestTemplate engineClient() {
         return new RestTemplate();
     }
 }

@@ -11,6 +11,6 @@ public interface ParserApi {
      LaundriesInfo getLaundries();
      Laundry getLaundry(String laundryId);
      LaundryInfo getLaundryInfo(String laundryId);
-     Boolean checkSlot(String laundryId, String slotId);
+     Boolean checkAvailable(String laundryId, String slotId);
      List<String> getAvailable(String laundryId);
 }

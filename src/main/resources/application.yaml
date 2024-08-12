@@ -16,5 +16,8 @@ bot:
   name: ${BOT_NAME}
   token: ${BOT_TOKEN}
 
+engine:
+  url: http://localhost:8080
+
 parser:
   url: http://185.223.93.175:8091/
