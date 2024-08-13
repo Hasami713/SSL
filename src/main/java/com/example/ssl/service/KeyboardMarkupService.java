@@ -1,31 +1,37 @@
 package com.example.ssl.service;
 
+import aj.org.objectweb.asm.TypeReference;
 import com.example.ssl.api.EngineApi;
 import com.example.ssl.api.ParserApi;
 import com.example.ssl.dto.TaskRunnerRequest;
-import com.example.ssl.model.KeyboardButton;
-import com.example.ssl.model.LaundryInfo;
+import com.example.ssl.model.*;
 import com.example.ssl.repository.UserRepository;
 import com.example.ssl.states.ChatState;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.MessageId;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PrimitiveIterator;
+import java.util.stream.Collectors;
 
 import static com.example.ssl.service.SelfServiceLaundryBot.BOT;
 import static com.example.ssl.service.SelfServiceLaundryBot.sendMessage;
-import static com.example.ssl.states.ChatState.ADDRESS_CHOSEN;
-import static com.example.ssl.states.ChatState.CHOICE_ADDRESS;
+import static com.example.ssl.states.ChatState.*;
 
 @Slf4j
 @Service
@@ -35,7 +41,7 @@ public class KeyboardMarkupService {
     private final ParserApi parserApi;
     private final UserService userService;
 
-    private final EngineApi engineApi;
+    private final UserRepository userRepository;
 
     private static InlineKeyboardMarkup getInlineKeyboardMarkup(int pageNumber, List<KeyboardButton> keyboardData, int totalPages, int pageSize) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -125,11 +131,6 @@ public class KeyboardMarkupService {
             chosenAddressMenu.add(new KeyboardButton("BACK_TO_ADDRESSES", "Назад⬅⬅⬅"));
             InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboardMarkup(1, chosenAddressMenu, 1, 8);
             SelfServiceLaundryBot.editMessage(chatId, messageId, "Вы выбрали адрес: " + laundryInfo.getAddress(), inlineKeyboardMarkup);
-            engineApi.taskRunner(TaskRunnerRequest.builder()
-                            .chatId(chatId)
-                            .laundryId(laundryId)
-                            .inlineKeyboardMarkup(null)
-                            .build());
         } else if (data.startsWith("PAGE:")) {
             int pageNumber = Integer.parseInt(data.substring("PAGE:".length()));
             showAddresses(chatId, pageNumber, callbackQuery);
@@ -137,6 +138,20 @@ public class KeyboardMarkupService {
             showAddresses(chatId, 1, callbackQuery);
             userService.updateUserChatState(message, CHOICE_ADDRESS);
             userService.updateLaundryId(message, "-");
+        } else if (data.startsWith("SUBSCRIBE_TO_ALL")) {
+            //userService.updateUserChatState(message, SUBSCRIBED_TO_ALL);
+            List<KeyboardButton> backToMenu = new ArrayList<>();
+            backToMenu.add(new KeyboardButton("BACK_TO_MENU", "Отменить подписку⬅⬅⬅"));
+            InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboardMarkup(1, backToMenu, 1, 8);
+            while (true) {
+                AvailableSlots allSlots = parserApi.getAvailable(userRepository.findById(message.getChatId()).get().getLaundryId());
+                List<String> availableId = allSlots.stream().filter(value -> value.equals("1")).toList();
+                if (allSlots.contains(1)) {
+                    sendMessage(chatId, "Свободные слоты: " + availableId, inlineKeyboardMarkup);
+                } else {
+                    sendMessage(chatId, "Нет свободных слотов(", inlineKeyboardMarkup);
+                }
+            }
         }
     }
 

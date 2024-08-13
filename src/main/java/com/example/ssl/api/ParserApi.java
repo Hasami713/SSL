@@ -1,9 +1,6 @@
 package com.example.ssl.api;
 
-import com.example.ssl.model.Laundries;
-import com.example.ssl.model.LaundriesInfo;
-import com.example.ssl.model.Laundry;
-import com.example.ssl.model.LaundryInfo;
+import com.example.ssl.model.*;
 
 import java.util.List;
 
@@ -12,5 +9,5 @@ public interface ParserApi {
      Laundry getLaundry(String laundryId);
      LaundryInfo getLaundryInfo(String laundryId);
      Boolean checkAvailable(String laundryId, String slotId);
-     List<String> getAvailable(String laundryId);
+     List<Slot> getAvailable(String laundryId);
 }

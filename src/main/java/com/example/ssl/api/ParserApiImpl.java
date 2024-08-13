@@ -11,6 +11,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.List;
 
 @Component
 public class ParserApiImpl extends BaseApi implements ParserApi {
@@ -50,7 +51,7 @@ public class ParserApiImpl extends BaseApi implements ParserApi {
     }
 
     @Override
-    public AvailableSlots getAvailable(String laundryId) {
+    public List<Slot> getAvailable(String laundryId) {
         return getRequest(String.format("%s/%s/available", LAUNDRY_PATH, laundryId), null, AvailableSlots.class);
     }
 }

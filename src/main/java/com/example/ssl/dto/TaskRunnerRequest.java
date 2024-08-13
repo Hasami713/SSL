@@ -8,6 +8,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 @Builder
 public class TaskRunnerRequest {
     private Long chatId;
-    private String laundryId;
+    private String laundryId1;
     private InlineKeyboardMarkup inlineKeyboardMarkup;
 }
