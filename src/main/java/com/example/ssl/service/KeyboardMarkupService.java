@@ -2,6 +2,7 @@ package com.example.ssl.service;
 
 import com.example.ssl.api.EngineApi;
 import com.example.ssl.api.ParserApi;
+import com.example.ssl.dto.TaskRunnerRequest;
 import com.example.ssl.model.KeyboardButton;
 import com.example.ssl.model.LaundryInfo;
 import com.example.ssl.repository.UserRepository;
@@ -97,8 +98,7 @@ public class KeyboardMarkupService {
         } else if (callbackQuery.getData().startsWith("BACK_TO_ADDRESSES")) {
             Integer messageId = callbackQuery.getMessage().getMessageId();
             SelfServiceLaundryBot.editMessage(chatId, messageId, "Выберите адрес общежития:", inlineKeyboardMarkup);
-        }
-        else {
+        } else {
             editKeyboard(callbackQuery, inlineKeyboardMarkup);
         }
     }
@@ -125,7 +125,11 @@ public class KeyboardMarkupService {
             chosenAddressMenu.add(new KeyboardButton("BACK_TO_ADDRESSES", "Назад⬅⬅⬅"));
             InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboardMarkup(1, chosenAddressMenu, 1, 8);
             SelfServiceLaundryBot.editMessage(chatId, messageId, "Вы выбрали адрес: " + laundryInfo.getAddress(), inlineKeyboardMarkup);
-            engineApi.heartbeatTest("sdsadsd");
+            engineApi.taskRunner(TaskRunnerRequest.builder()
+                            .chatId(chatId)
+                            .laundryId(laundryId)
+                            .inlineKeyboardMarkup(null)
+                            .build());
         } else if (data.startsWith("PAGE:")) {
             int pageNumber = Integer.parseInt(data.substring("PAGE:".length()));
             showAddresses(chatId, pageNumber, callbackQuery);

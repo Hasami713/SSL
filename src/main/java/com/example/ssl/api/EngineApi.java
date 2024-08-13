@@ -1,5 +1,7 @@
 package com.example.ssl.api;
 
+import com.example.ssl.dto.TaskRunnerRequest;
+
 public interface EngineApi {
-    public void heartbeatTest(String text);
+    public void taskRunner(TaskRunnerRequest taskRunnerRequest);
 }

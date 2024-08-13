@@ -2,6 +2,7 @@ package com.example.ssl.api;
 
 import com.example.ssl.config.ClientConfig;
 import com.example.ssl.config.EngineConfig;
+import com.example.ssl.dto.TaskRunnerRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -10,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class EngineApiImpl extends BaseApi implements EngineApi{
 
-    private static final String HEARTBEAT_TEST = "api/v1/heartbeatTest";
+    private static final String HEARTBEAT_TEST = "/api/v1/taskRunner";
 
 
     public EngineApiImpl(RestTemplate engineClient, EngineConfig engineConfig) {
@@ -18,7 +19,7 @@ public class EngineApiImpl extends BaseApi implements EngineApi{
     }
 
     @Override
-    public void heartbeatTest(String text) {
-        postRequest(HEARTBEAT_TEST, null, text, String.class);
+    public void taskRunner(TaskRunnerRequest taskRunnerRequest) {
+        postRequest(HEARTBEAT_TEST, null, taskRunnerRequest, String.class);
     }
 }
